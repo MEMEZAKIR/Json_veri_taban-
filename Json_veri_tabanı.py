@@ -96,7 +96,7 @@ class Site:
         for i in range(5):
             print(".",end="",flush=True)
             time.sleep(.5)
-            print("\nJson Veri Tabanına hoşgeldiniz ")
+        print("\nJson Veri Tabanına hoşgeldiniz ")
         time.sleep(.7)
         self.Sonuç = False
         self.dongu = False
@@ -280,4 +280,5 @@ class Site:
 
 Sistem = Site()
 while Sistem.dongu:
+
     Sistem.program()
