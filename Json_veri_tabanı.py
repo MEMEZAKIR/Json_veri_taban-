@@ -3,282 +3,283 @@ import re
 import random
 import time
 
+
 class Site:
     def __init__(self):
-        self.dongu = True
-        self.veriler = self.verial()
+        # Main loop flag
+        self.running = True
+        # Load data from JSON (if exists)
+        self.data = self.load_data()
 
     def menu(self):
-        def kontrol(secim):
-            if re.search("[^1-3]",secim):
-                raise Exception("Lütfen 1 ile 3 arası bir değer giriniz")
-            elif len(secim) != 1:
-                raise Exception("Lütfen 1 ile 3 arası bir değer giriniz")
+        """Show main menu and validate selection."""
+        def validate(choice):
+            if re.search("[^1-3]", choice):
+                raise Exception("Please enter a value between 1 and 3")
+            elif len(choice) != 1:
+                raise Exception("Please enter a value between 1 and 3")
+
         while True:
             try:
-                secim = input("\nMerhaba. Beydan Sitesine Hoşgeldiniz.\n\nLütfen yapmak istediğiniz işlemi seçiniz...\n\n[1]- Giriş\n[2]- Kayıt\n[3]- Çıkış\n\n")
-                kontrol(secim)
-            except Exception as Hata:
-                print("{}".format(Hata))
+                choice = input(
+                    "\nHello. Welcome to the Beydan Site.\n\nPlease select the operation you want to perform...\n\n[1]- Login\n[2]- Register\n[3]- Exit\n\n"
+                )
+                validate(choice)
+            except Exception as err:
+                print("{}".format(err))
                 time.sleep(3)
             else:
                 break
-        return secim
+        return choice
 
     def program(self):
-        secim = self.menu()
+        choice = self.menu()
 
-        if secim == "1":
-            print("\nGiriş menüsüne yönlendiriliyorsunuz")
+        if choice == "1":
+            print("\nRedirecting to login menu")
             for i in range(5):
-                print(".",end="",flush=True)
+                print(".", end="", flush=True)
                 time.sleep(.5)
             time.sleep(.7)
-            self.giris()
+            self.login()
 
-        if secim == "2":
-            print("\nKayıt menüsüne yönlendiriliyorsunuz")
+        if choice == "2":
+            print("\nRedirecting to registration menu")
             for i in range(5):
-                print(".",end="",flush=True)
+                print(".", end="", flush=True)
                 time.sleep(.5)
             time.sleep(.7)
-            self.kayitol()
+            self.register()
 
-        if secim == "3":
-            print("\nÇıkış gerçekleştiriliyor")
+        if choice == "3":
+            print("\nExiting")
             for i in range(5):
-                print(".",end="",flush=True)
+                print(".", end="", flush=True)
                 time.sleep(.5)
-            time.sleep(.7)            
-            self.cikis()
+            time.sleep(.7)
+            self.exit_program()
 
-#-***-
-#---Fonksiyonlar arası değer göndermeye örnek---
-
-    def giris(self):
+    # ----- Login flow -----
+    def login(self):
         while True:
-            Kullanıcı_Adı = input("\nLütfen bir kullanıcı adı giriniz")
-            Şifre = input("Lütfen şifrenizi giriniz")
+            username = input("\nPlease enter a username: ")
+            password = input("Please enter your password: ")
 
-            Sonuç = self.giriskontrol(Kullanıcı_Adı,Şifre)
-            
-            if Sonuç == True:
-                self.girisbasarili()
+            result = self.login_check(username, password)
+
+            if result is True:
+                self.login_successful()
                 break
 
             else:
-                self.girisbasarisiz()
+                self.login_failed()
                 break
 
-    def giriskontrol(self, Kullanıcı_Adı, Şifre):
-        #-- herhangi bir return sonucuna ulaşıldığında döngü biter 
+    def login_check(self, username, password):
+        """Check provided credentials against stored data."""
         try:
-            self.veriler = self.verial()
-            kullanıcılar = self.veriler["Kullanıcılar"]  # Burada KeyError yakalanabilir
-            
-            for kullanıcı in kullanıcılar:
-                if kullanıcı["Kullanıcı_Adı"] == Kullanıcı_Adı and kullanıcı["Şifre"] == Şifre:
+            self.data = self.load_data()
+            users = self.data["Users"]  # May raise KeyError if structure not present
+
+            for user in users:
+                if user["username"] == username and user["password"] == password:
                     return True
 
-                #elif kullanıcı["Kullanıcı_Adı"] == Kullanıcı_Adı and kullanıcı["Şifre"] != Şifre:
-                #    print("\nŞifreniz bu Kullanıcı Adıyla uyuşmuyor. Lütfen tekrar deneyiniz.")
-                #    return False  #-Kullanıcıya tekrar deneme hakki verir... 
-        
-        except KeyError: # Eğer "Kullanıcılar" anahtarı yoksa veya veri yapısı beklendiği gibi değilse
-            
-            print("Kullanıcı veritabanında kayıtlı kullanıcı bulunamadı.")
-          
+        except KeyError:
+            print("No users found in the database.")
+
         return False
 
-
-    def girisbasarili(self):
-        print("\ngiriş kontol ediliyor")
+    def login_successful(self):
+        print("\nVerifying login")
         for i in range(5):
-            print(".",end="",flush=True)
+            print(".", end="", flush=True)
             time.sleep(.5)
-        print("\nJson Veri Tabanına hoşgeldiniz ")
+        print("\nWelcome to the JSON Database")
         time.sleep(.7)
-        self.Sonuç = False
-        self.dongu = False
+        # Stop the main loop and set result flag
+        self.result = False
+        self.running = False
 
-
-    def girisbasarisiz(self):
-        print("\ngiriş kontol ediliyor")
+    def login_failed(self):
+        print("\nVerifying login")
         for i in range(5):
-            print(".",end="",flush=True)
+            print(".", end="", flush=True)
             time.sleep(.5)
         time.sleep(.7)
-        print("\nGiriş Başarısız")
+        print("\nLogin failed")
         time.sleep(2)
 
         while True:
-            kayıt_olma_seçimi = input("\nGirdiğiniz bilgilere ait bir hesap bulamadık. Kaydınız yok mu?\nKayıt olmak için -[1]\nAna menüye gitmek için -[2]\n")
-            if kayıt_olma_seçimi == "1":
-                print("\nKayıt menüsüne yönlendiriliyorsunuz...")
+            register_choice = input(
+                "\nWe couldn't find an account with the provided details. Don't have an account?\nRegister - [1]\nGo back to main menu - [2]\n"
+            )
+            if register_choice == "1":
+                print("\nRedirecting to registration menu...")
                 for i in range(5):
-                    print(".",end="",flush=True)
+                    print(".", end="", flush=True)
                     time.sleep(.5)
                 time.sleep(.7)
-                self.kayitol()
-                return # Doğrudan ana döngüye dön
-            elif kayıt_olma_seçimi == "2":
-                print("\nAna menüye yönlendiriliyorsunuz...")
+                self.register()
+                return
+            elif register_choice == "2":
+                print("\nReturning to main menu...")
                 for i in range(5):
-                    print(".",end="",flush=True)
+                    print(".", end="", flush=True)
                     time.sleep(.5)
                 time.sleep(.7)
-                return # Doğrudan ana döngüye dön
+                return
             else:
-                print("Lütfen geçerli bir seçim yapın.")
+                print("Please enter a valid selection.")
 
+    # ----- Registration flow -----
+    def register(self):
+        def validate_username(username):
+            if len(username) < 8:
+                raise Exception("Your username must be at least 8 characters long")
+            if not username.isalpha():
+                raise Exception("Your username must consist of letters only")
 
-
-    def kayitol(self):
-        def kayit_ka(Kullanıcı_Adı):
-            if len(Kullanıcı_Adı) < 8:
-                raise Exception("\nKullanıcı Adınız 8 karakterden fazla olmalı")
-            if Kullanıcı_Adı.isalpha == False:
-                raise Exception("\nKullanıcı Adınız sadece harflerden oluşabilir")
         while True:
             try:
-                Kullanıcı_Adı = input("\n Lütfen bir Kullanıcı Adı giriniz")
-                kayit_ka(Kullanıcı_Adı)
-            except Exception as Hata:
-                print(Hata)
+                username = input("\nPlease enter a username: ")
+                validate_username(username)
+            except Exception as err:
+                print(err)
             else:
                 break
 
-        def kayit_si(Şifre):
-            Dogumtarihi = "2005"
-            Karakterler = ["\@,\€,\+,\*,\?,\!"]
-            if len(Şifre) < 8:
-                raise Exception("\nŞifreniz 8 karakterden fazla olmalı")
-            elif not re.search("[a-z]",Şifre):
-                raise Exception(" en az 1 tane küçük harf olmalı")
-            elif not re.search("[0-9]", Şifre):
-                raise Exception(" en az 1 tane rakam girmelisin")
-            elif not re.search(str(Karakterler), Şifre):
-                raise Exception(" en az bir özel (\@,\€,\+,\*,\?,\!) karakter girmelisin")
-            elif not re.search("[A-Z]", Şifre):
-                raise Exception("en az 1 büyük harf girmelisin.")
-            elif re.search(Dogumtarihi, Şifre):
-                raise Exception("şifrene doğum tarihini ekleyemezsin")
-            
+        def validate_password(password):
+            birth_year = "2005"
+            special_chars_regex = r"[\\@€\+\*\?!]"
+
+            if len(password) < 8:
+                raise Exception("Your password must be at least 8 characters long")
+            elif not re.search("[a-z]", password):
+                raise Exception("Password must contain at least one lowercase letter")
+            elif not re.search("[0-9]", password):
+                raise Exception("Password must contain at least one digit")
+            elif not re.search(special_chars_regex, password):
+                raise Exception("Password must contain at least one special character (e.g. @, €, +, *, ?, !)")
+            elif not re.search("[A-Z]", password):
+                raise Exception("Password must contain at least one uppercase letter")
+            elif re.search(birth_year, password):
+                raise Exception("You cannot include your birth year in the password")
+
         while True:
             try:
-                Şifre = input("\n Lütfen bir Şifre giriniz")
-                kayit_si(Şifre)
-            except Exception as Hata:
-                print(Hata)
-            else:
-                break
-        
-        def kayit_mail(Mail):
-            if not re.search("@gmail.com" or "@hotmail.com", Mail):
-                raise Exception("\n mailinizde '@gmail.com' ya da '@hotmail.com' ibaresi bulunmalıdır. ")
-            
-        while True:
-            try:
-                Mail = input("\n Mailinizi giriniz. ")
-                kayit_mail(Mail)
-            except Exception as Mail_hata:
-                print(Mail_hata)
+                password = input("\nPlease enter a password: ")
+                validate_password(password)
+            except Exception as err:
+                print(err)
             else:
                 break
 
-        Mail_sonuc = self.mailvarmi(Mail)
-        if Mail_sonuc == False:
+        def validate_email(email):
+            if not ("@gmail.com" in email or "@hotmail.com" in email):
+                raise Exception("Your email must include '@gmail.com' or '@hotmail.com'")
 
-            KullanıcıAdı_sonuc =self.kullaniciadivarmi(Kullanıcı_Adı)
-            if KullanıcıAdı_sonuc == False:
+        while True:
+            try:
+                email = input("\nPlease enter your email: ")
+                validate_email(email)
+            except Exception as err:
+                print(err)
+            else:
+                break
 
-                aktivasyon_kodu = self.aktivasyongonder()
-                durum = self.aktivasyonkontrol(aktivasyon_kodu)
+        email_exists = self.email_exists(email)
+        if email_exists == False:
+
+            username_exists = self.username_exists(username)
+            if username_exists == False:
+
+                activation_code = self.send_activation()
+                activated = self.activation_check(activation_code)
                 while True:
-                    if durum == True:
-                        self.verikaydet(Kullanıcı_Adı,Şifre,Mail)
-                        print("\n-- Kaydınız oluşturulmuştur --")
+                    if activated == True:
+                        self.save_data(username, password, email)
+                        print("\n-- Your account has been created --")
                         time.sleep(3)
-                        return # Doğrudan ana döngüye dön
-            
+                        return
+
                     else:
-                        print("Aktivasyon Kodunuz Yanlış")
+                        print("Your activation code is incorrect")
                         time.sleep(5)
-                        return # Doğrudan ana döngüye dön
+                        return
             else:
-                print("\nBu Kullanıcı Adı sistemde var...")
+                print("\nThis username is already taken...")
         else:
-            print("\nBu Mail sistemde var...")
+            print("\nThis email is already in use...")
 
-    def mailvarmi(self,Mail):
-        self.veriler = self.verial()
+    def email_exists(self, email):
+        self.data = self.load_data()
 
         try:
-            for mail in self.veriler["Kullanıcı"]:
-                if mail["Mail"] == Mail:
+            for e in self.data["Users"]:
+                if e["email"] == email:
                     return True
         except KeyError:
             return False
         return False
-            
-    def kullaniciadivarmi(self,Kullanıcı_Adı):
-        self.veriler = self.verial()
+
+    def username_exists(self, username):
+        self.data = self.load_data()
 
         try:
-            for kullanıcı_adı in self.veriler["Kullanıcı"]:
-                if kullanıcı_adı["Kullanıcı_Adı"] == Kullanıcı_Adı:
+            for u in self.data["Users"]:
+                if u["username"] == username:
                     return True
         except KeyError:
             return False
         return False
-        
-    def aktivasyongonder(self):
-        with open("C:/Users/user/Desktop/Aktivasyon.txt","w",encoding="utf8") as Dosya:
-            aktivasyon = str( random.randint(10000,99999))
-            Dosya.write("Aktivasyon kodunuz:" + aktivasyon)
 
-        return aktivasyon
-    
-    def aktivasyonkontrol(self,aktivasyon):
-        aktivasyon_girilen = input("\nLütfen mailinize gelen aktivasyon kodunu giriniz.")
-        if aktivasyon == aktivasyon_girilen:
+    def send_activation(self):
+        # Simulated activation code sending. No real email is sent.
+        with open("C:/Users/user/Desktop/Activation.txt", "w", encoding="utf8") as f:
+            activation = str(random.randint(10000, 99999))
+            f.write("Your activation code:" + activation)
+
+        return activation
+
+    def activation_check(self, activation):
+        entered = input("\nPlease enter the activation code that was sent to your email: ")
+        if activation == entered:
             return True
-        
+
         else:
             return False
 
-    def verial(self):
+    def load_data(self):
         try:
-            with open("C:/Users/user/Desktop/Kullanıcılar.json","r",encoding="utf8") as Dosya:
-                veriler = json.load(Dosya)
+            with open("C:/Users/user/Desktop/Users.json", "r", encoding="utf8") as f:
+                data = json.load(f)
         except FileNotFoundError:
-            with open("C:/Users/user/Desktop/Kullanıcılar.json","w",encoding="utf8") as Dosya:
-                Dosya.write("{}")
-            with open("C:/Users/user/Desktop/Kullanıcılar.json","r",encoding="utf8") as Dosya:
-                veriler = json.load(Dosya)
-        return veriler
-                
-    def verikaydet(self,Kullanıcı_Adı,Şifre,Mail):
-        self.veriler = self.verial()
+            with open("C:/Users/user/Desktop/Users.json", "w", encoding="utf8") as f:
+                f.write("{}")
+            with open("C:/Users/user/Desktop/Users.json", "r", encoding="utf8") as f:
+                data = json.load(f)
+        return data
+
+    def save_data(self, username, password, email):
+        self.data = self.load_data()
         try:
-            self.veriler["Kullanıcılar"].append({"Kullanıcı_Adı":Kullanıcı_Adı,"Şifre":Şifre,"Mail":Mail})
+            self.data["Users"].append({"username": username, "password": password, "email": email})
         except KeyError:
-            self.veriler["Kullanıcılar"] = list()
-            self.veriler["Kullanıcılar"].append({"Kullanıcı_Adı":Kullanıcı_Adı,"Şifre":Şifre,"Mail":Mail})
+            self.data["Users"] = list()
+            self.data["Users"].append({"username": username, "password": password, "email": email})
 
-        with open("C:/Users/user/Desktop/Kullanıcılar.json","w",encoding="utf8") as Dosya:
-            json.dump(self.veriler,Dosya,ensure_ascii=False,indent=4)#-Türkçe karakter için
+        with open("C:/Users/user/Desktop/Users.json", "w", encoding="utf8") as f:
+            json.dump(self.data, f, ensure_ascii=False, indent=4)  
 
-    def cikis(self):
-        print("Siteden çıkılıyor...")
+    def exit_program(self):
+        print("Exiting site...")
         time.sleep(3)
-        self.dongu= False
+        self.running = False
         exit()
 
 
-
-
-Sistem = Site()
-while Sistem.dongu:
-
-    Sistem.program()
+if __name__ == "__main__":
+    system = Site()
+    while system.running:
+        system.program()
